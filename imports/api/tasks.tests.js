@@ -32,7 +32,58 @@ if (Meteor.isServer) {
         // Verifying that the method does what is expected
         assert.equal(Tasks.find().count(), 0);
       });
-      
+
+      it('can make owned task private', () => {
+        // Finding the internal implementation of the task method to test it in isolation
+        const privateTask = Meteor.server.method_handlers['tasks.setPrivate'];
+        const setToPrivate = true;
+        // Fake method invocation that looks like what the method expects
+        const invocation = { userId };
+        // Running the method with `this` set to the fake invocation
+        privateTask.apply(invocation, [taskId, setToPrivate]);
+        // Verifying that the method does what is expected
+        assert.equal(Tasks.findOne(taskId).private, true);
+      });
+
+      it('can make owned task public', () => {
+        // Finding the internal implementation of the task method to test it in isolation
+        const privateTask = Meteor.server.method_handlers['tasks.setPrivate'];
+        const setToPrivate = false;
+        // Fake method invocation that looks like what the method expects
+        const invocation = { userId };
+        // Running the method with `this` set to the fake invocation
+        privateTask.apply(invocation, [taskId, !setToPrivate]);
+        privateTask.apply(invocation, [taskId, setToPrivate]);
+        // Verifying that the method does what is expected
+        assert.equal(Tasks.findOne(taskId).private, false);
+      });
+
+      it('can check owned task, if private', () => {
+        // Finding the internal implementation of the task method to test it in isolation
+        const privateTask = Meteor.server.method_handlers['tasks.setPrivate'];
+        const checkTask = Meteor.server.method_handlers['tasks.setChecked'];
+        const setTo = true;
+        // Fake method invocation that looks like what the method expects
+        const invocation = { userId };
+        // Running the method with `this` set to the fake invocation
+        privateTask.apply(invocation, [taskId, setTo]);
+        checkTask.apply(invocation, [taskId, setTo]);
+        // Verifying that the method does what is expected
+        assert.equal(Tasks.findOne(taskId).checked, true);
+      });
+
+      it('anyone can check public task', () => {
+        // Finding the internal implementation of the task method to test it in isolation
+        const checkTask = Meteor.server.method_handlers['tasks.setChecked'];
+        const setTo = true;
+        // Fake method invocation that looks like what the method expects
+        const invocation = Random.id();
+        // Running the method with `this` set to the fake invocation
+        checkTask.apply(invocation, [taskId, setTo]);
+        // Verifying that the method does what is expected
+        assert.equal(Tasks.findOne(taskId).checked, true);
+      });
+
     });
   });
 }
