@@ -32,18 +32,7 @@ if (Meteor.isServer) {
         // Verifying that the method does what is expected
         assert.equal(Tasks.find().count(), 0);
       });
-
-      it('can make owned task private', () => {
-        // Finding the internal implementation of the task method to test it in isolation
-        const privateTask = Meteor.server.method_handlers['tasks.setPrivate'];
-        const setToPrivate = true;
-        // Fake method invocation that looks like what the method expects
-        const invocation = { taskId, setToPrivate };
-        // Running the method with `this` set to the fake invocation
-        privateTask.apply(invocation, [taskId]);
-        // Verifying that the method does what is expected
-        assert.equal(Tasks.findOne(taskId).private, true);
-      });
+      
     });
   });
 }
